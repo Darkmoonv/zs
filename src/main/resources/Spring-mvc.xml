@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xsi:schemaLocation="
+       http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+       http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd
+
+">
+    <!--一旦在spring-mvc.xml配置里面配置了注解驱动，他就可以直接将对象或者集合转换为json对象-->
+    <mvc:annotation-driven conversion-service="ConversionService"/>
+    <!--springmvc对静态资源开放，如不配置则(img/js)等目录下的静态资源无法访问-->
+    <mvc:default-servlet-handler/>
+    <!--扫描control包下的注解-->
+    <context:component-scan base-package="com.zs"/>
+
+    <!--配置内部资源视图解析器-->
+    <bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+        <!--将资源前面的字符加上/-->
+        <property name="prefix" value="/"></property>
+        <!--将资源后面的字符加上.jsp-->
+        <property name="suffix" value=".jsp"></property>
+    </bean>
+    <!--声明自定义转化器-->
+    <bean id="ConversionService" class="org.springframework.context.support.ConversionServiceFactoryBean">
+        <property name="converters">
+            <list>
+                <bean class="com.zs.converter.StringToDate"/>
+            </list>
+        </property>
+    </bean>
+    <!--配置文件上传解析器-->
+    <bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+        <property name="defaultEncoding" value="UTF-8"></property>
+        <property name="maxUploadSize" value="70000"></property>
+    </bean>
+    <!--配置拦截器-->
+    <mvc:interceptors>
+        <mvc:interceptor>
+            <!--拦截所有资源-->
+            <mvc:mapping path="/**"/>
+            <!--配置不进行拦截的资源-->
+            <mvc:exclude-mapping path="/user/login"/>
+            <bean class="com.zs.interceptor.MyInterceptor1"/>
+        </mvc:interceptor>
+        <!--如果有多个拦截器
+        <mvc:interceptor>
+            <mvc:mapping path="/**"/>
+            <bean class="com.zs.interceptor.MyInterceptor2"/>
+        </mvc:interceptor>-->
+    </mvc:interceptors>
+</beans>
